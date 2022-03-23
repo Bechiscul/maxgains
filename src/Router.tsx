@@ -1,12 +1,6 @@
-import {
-  ComponentType,
-  FunctionalComponent,
-  createContext,
-  ComponentChild,
-  JSX,
-  Context,
-  toChildArray,
-} from "preact";
+// TODO(Bech): Matching
+
+import { FunctionalComponent, createContext, JSX } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
 class Location {
@@ -20,13 +14,17 @@ class Location {
     return location;
   }
 
+  public static fromPath(path: string, state?: object, key?: string) {
+    const url = new URL(window.location.origin + path);
+    return Location.fromUrl(url, state, key);
+  }
+
   public static fromWindowLocation(state?: object, key?: string) {
     const url = new URL(window.location.toString());
     return Location.fromUrl(url, state, key);
   }
 
   public get url() {
-    // console.log(window.location.origin);
     return new URL(
       window.location.origin + this.pathname + this.search + this.hash
     );
@@ -35,109 +33,95 @@ class Location {
   public pathname: string = "";
   public search: URLSearchParams = new URLSearchParams(undefined);
   public hash: string = "";
-  public state: object | null = null;
+  public state: unknown = null;
   public key?: string = undefined;
 }
 
-class History {
-  public pushState(location: Location) {
-    this.locations = this.locations.slice(this.index);
-    this.locations.push(location);
-    if (this.currentLocation !== undefined) {
-      this.index += 1;
-    }
-  }
-
-  public popState() {}
-
-  public get currentLocation() {
-    if (this.locations.length > 0) {
-      return this.locations[0];
-    }
-
-    return undefined;
-  }
-
-  locations: Location[] = [];
-  index: number = 0;
+interface HistoryState {
+  index: number;
 }
 
-const RouterContext = createContext({
-  location: Location.fromWindowLocation(),
-});
+class History {
+  public constructor(history: globalThis.History) {
+    this.history = history;
+  }
+
+  public static fromWindowHistory() {
+    return new History(window.history);
+  }
+
+  public pushState(nextLocation: Location) {
+    const nextIndex = this.index + 1;
+    const historyState = History._historyStateFromLocation(
+      nextLocation,
+      nextIndex
+    );
+
+    this.history.pushState(historyState, "", nextLocation.url);
+  }
+
+  public handlePopState(e: PopStateEvent) {
+    console.log("popped");
+  }
+
+  private static _historyStateFromLocation(
+    nextLocation: Location,
+    nextIndex: number
+  ): HistoryState {
+    return {
+      index: nextIndex,
+    };
+  }
+
+  private history: globalThis.History;
+  private index: number = 0;
+}
 
 const HistoryContext = createContext({
-  pushState: (location: Location) => {},
-  replaceState: (location: Location) => {},
-  popState: () => {},
+  pushState: (nextLocation: Location) => {},
 });
 
-export type RouterProps = {
-  onChange?: () => unknown;
-};
-
-export const Router: FunctionalComponent<RouterProps> = ({ children }) => {
+export const Router: FunctionalComponent = ({ children }) => {
+  const [history, setHistory] = useState(History.fromWindowHistory());
   const [location, setLocation] = useState(Location.fromWindowLocation());
-  // const [history, setHistory] = useState<Location[]>([location]);
-
-  const pushState = (location: Location) => {
-    setLocation(location);
-    window.history.pushState(location.state, "", location.url);
-  };
-
-  const replaceState = (location: Location) => {};
-
-  const popState = () => {
-    window.history.back();
-  };
-
-  const handlePopState = (e: PopStateEvent) => {
-    console.log(window.history);
-    e.preventDefault();
-
-    setLocation(location);
-  };
 
   useEffect(() => {
-    // setRoute(window.location.pathname);
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    window.addEventListener("popstate", (e) => {
+      history.handlePopState(e);
+      setLocation(Location.fromWindowLocation());
+    });
+
+    return () => window.removeEventListener("popstate", history.handlePopState);
   }, []);
 
+  const pushState = (nextLocation: Location) => {
+    setHistory((history) => {
+      history.pushState(nextLocation);
+      return history;
+    });
+
+    setLocation(nextLocation);
+  };
+
   return (
-    <RouterContext.Provider value={{ location }}>
-      <HistoryContext.Provider value={{ pushState, popState, replaceState }}>
-        {children}
-      </HistoryContext.Provider>
-    </RouterContext.Provider>
+    <HistoryContext.Provider value={{ pushState }}>
+      {children}
+      <p>{window.location.toString()}</p>
+    </HistoryContext.Provider>
   );
 };
 
-export type RouteProps = {
-  path: string;
-  element?: JSX.Element;
-};
+export interface LinkProps {
+  path?: string;
+}
 
-export const Route: FunctionalComponent<RouteProps> = ({ path, element }) => {
-  const { location } = useContext(RouterContext);
-  return path === location.pathname && element ? element : <></>;
-};
-
-export const useRoutes = () => {};
-
-export type LinkProps = {
-  url?: string;
-  state?: object;
-};
-
-export const Link: FunctionalComponent<LinkProps> = (props) => {
-  let { url, state, children } = props;
-  const { pushState } = useHistory();
+export const Link: FunctionalComponent<LinkProps> = ({ path, children }) => {
+  const { pushState } = useContext(HistoryContext);
 
   const handleClick = (e: JSX.TargetedMouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (url !== undefined) {
-      pushState(Location.fromUrl(new URL(url), state));
+    if (path !== undefined) {
+      pushState(Location.fromPath(path));
     }
   };
 
@@ -146,8 +130,4 @@ export const Link: FunctionalComponent<LinkProps> = (props) => {
       {children}
     </a>
   );
-};
-
-export const useHistory = () => {
-  return useContext(HistoryContext);
 };
