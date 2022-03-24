@@ -4,11 +4,20 @@ import { Link, Router } from "./Router";
 
 import "preact/devtools";
 
+import Container from "./ui/Container";
+import AppBar from "./components/AppBar";
+
 const App: FunctionalComponent = () => (
   <>
     <Router>
-      <Link path="/hello-world">Hello World!</Link>
-      <Link path="/hello-world2">Hello World 2!</Link>
+      <div className="">
+        <Container>
+          <p>test</p>
+        </Container>
+      </div>
+      <div className="absolute w-screen bottom-0">
+        <AppBar />
+      </div>
     </Router>
   </>
 );

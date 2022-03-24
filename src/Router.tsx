@@ -126,7 +126,7 @@ export const Link: FunctionalComponent<LinkProps> = ({ path, children }) => {
   };
 
   return (
-    <a href="test" onClick={handleClick}>
+    <a href={path} onClick={handleClick}>
       {children}
     </a>
   );
