@@ -1,7 +1,12 @@
-import { FunctionComponent } from "preact";
+import { FunctionComponent, JSX } from "preact";
 
-const Container: FunctionComponent = ({ children }) => {
-  return <div className="w-full px-4 md:px-10">{children}</div>;
+export interface ContainerProps extends JSX.HTMLAttributes<HTMLDivElement> {}
+
+const Container: FunctionComponent<ContainerProps> = ({
+  className,
+  ...rest
+}) => {
+  return <div className={`container ${className}`} {...rest} />;
 };
 
 export default Container;

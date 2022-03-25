@@ -1,6 +1,6 @@
 // TODO(Bech): Matching
 
-import { FunctionalComponent, createContext, JSX } from "preact";
+import { FunctionComponent, createContext, JSX, ComponentChild } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 
 class Location {
@@ -24,10 +24,12 @@ class Location {
     return Location.fromUrl(url, state, key);
   }
 
+  public get path() {
+    return this.pathname + this.search + this.hash;
+  }
+
   public get url() {
-    return new URL(
-      window.location.origin + this.pathname + this.search + this.hash
-    );
+    return new URL(window.location.origin + this.path);
   }
 
   public pathname: string = "";
@@ -81,7 +83,10 @@ const HistoryContext = createContext({
   pushState: (nextLocation: Location) => {},
 });
 
-export const Router: FunctionalComponent = ({ children }) => {
+const LocationContext = createContext(new Location());
+
+// TODO(Bech): useMemo.
+export const Router: FunctionComponent = ({ children }) => {
   const [history, setHistory] = useState(History.fromWindowHistory());
   const [location, setLocation] = useState(Location.fromWindowLocation());
 
@@ -105,29 +110,46 @@ export const Router: FunctionalComponent = ({ children }) => {
 
   return (
     <HistoryContext.Provider value={{ pushState }}>
-      {children}
-      <p>{window.location.toString()}</p>
+      <LocationContext.Provider value={location}>
+        {children}
+      </LocationContext.Provider>
     </HistoryContext.Provider>
   );
 };
 
-export interface LinkProps {
-  path?: string;
+export interface LinkProps
+  extends Omit<JSX.HTMLAttributes<HTMLAnchorElement>, "href"> {
+  to?: string;
 }
 
-export const Link: FunctionalComponent<LinkProps> = ({ path, children }) => {
+export const Link: FunctionComponent<LinkProps> = ({
+  to,
+  onClick,
+  ...rest
+}) => {
   const { pushState } = useContext(HistoryContext);
 
-  const handleClick = (e: JSX.TargetedMouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    if (path !== undefined) {
-      pushState(Location.fromPath(path));
+  const handleClick: JSX.MouseEventHandler<HTMLAnchorElement> = (ev) => {
+    // @ts-expect-error
+    if (onClick) onClick(ev);
+
+    if (!ev.defaultPrevented) {
+      ev.preventDefault();
+      if (to !== undefined) {
+        pushState(Location.fromPath(to));
+      }
     }
   };
 
-  return (
-    <a href={path} onClick={handleClick}>
-      {children}
-    </a>
-  );
+  return <a href={to} onClick={handleClick} {...rest} />;
+};
+
+export interface RouteProps {
+  path: string;
+  element?: ComponentChild;
+}
+
+export const Route: FunctionComponent<RouteProps> = ({ path, element }) => {
+  let location = useContext(LocationContext);
+  return location.path === path ? <>{element}</> : null;
 };

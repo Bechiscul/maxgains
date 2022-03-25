@@ -23,7 +23,13 @@ const plugin = (snowpackConfig, options) => {
       export const Component = ({...props}) => {return (${svgElementWithProps})};
       Component.displayName = "${iconName}Icon"; `;
 
-      const compiledCode = esbuild.transformSync(componentCode, {
+      // const compiledCode = esbuild.transformSync(componentCode, {
+      //   loader: "tsx",
+      //   jsxFactory: snowpackConfig.buildOptions.jsxFactory,
+      //   jsxFragment: snowpackConfig.buildOptions.jsxFragment,
+      // });
+
+      const compiledCode = await esbuild.transform(componentCode, {
         loader: "tsx",
         jsxFactory: snowpackConfig.buildOptions.jsxFactory,
         jsxFragment: snowpackConfig.buildOptions.jsxFragment,

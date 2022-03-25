@@ -1,21 +1,19 @@
 import { FunctionalComponent } from "preact";
 
-import { Link, Router } from "./Router";
+import { Link, Route, Router } from "./Router";
 
 import "preact/devtools";
 
-import Container from "./ui/Container";
 import AppBar from "./components/AppBar";
+import Exercises from "./pages/Exercises";
 
 const App: FunctionalComponent = () => (
   <>
     <Router>
-      <div className="">
-        <Container>
-          <p>test</p>
-        </Container>
+      <div className="h-[calc(100vh-64px)]">
+        <Route path="/exercises" element={<Exercises />} />
       </div>
-      <div className="absolute w-screen bottom-0">
+      <div className="fixed w-screen">
         <AppBar />
       </div>
     </Router>
