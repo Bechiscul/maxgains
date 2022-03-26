@@ -4,6 +4,9 @@ import Badge from "../ui/Badge";
 import Container from "../ui/Container";
 
 import { Component as PhotoCameraIcon } from "../assets/icons/photo_camera.svg";
+import { Component as SearchIcon } from "../assets/icons/search.svg";
+import { Component as FilterIcon } from "../assets/icons/filter.svg";
+import { Component as CreateIcon } from "../assets/icons/create.svg";
 
 type Exercise = {
   name: string;
@@ -81,7 +84,7 @@ const Exercises: FunctionComponent = () => {
   return (
     <>
       <div className="flex flex-col h-full overflow-y-scroll">
-        <h1 className="mx-4 mt-16 text-3xl font-semibold">Exercises</h1>
+        <h1 className="mx-4 mt-6 text-3xl font-semibold">Exercises</h1>
         <ul className="px-4 py-2 flex flex-col gap-1">
           {exercises.map((exercise) => (
             <ExerciseItem exercise={exercise} />
@@ -98,7 +101,7 @@ interface ExerciseProps {
 
 const ExerciseItem: FunctionComponent<ExerciseProps> = ({ exercise }) => (
   <li className="h-20 flex gap-2 items-center border-b border-neutral-100 last:border-0">
-    <div className="flex w-16 h-16 rounded-full bg-neutral-100 items-center justify-center">
+    <div className="flex w-14 h-14 rounded-full bg-neutral-100 items-center justify-center">
       <PhotoCameraIcon />
     </div>
     <div className="h-16 relative flex flex-col -space-y-1 justify-center">

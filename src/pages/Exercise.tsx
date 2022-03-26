@@ -1,7 +1,7 @@
 import { FunctionComponent } from "preact";
 
 const Exercise: FunctionComponent = () => {
-  <div></div>;
+  return <div></div>;
 };
 
 export default Exercise;
