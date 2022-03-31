@@ -40,7 +40,7 @@ const Template: FunctionComponent = () => {
               className="text-rose-400 fill-current"
             />
           )}
-          <KebabMenuIcon />
+          <KebabMenuIcon onClick={() => setShowDeleteModal(true)} />
         </div>
       </nav>
       <div className="flex flex-col h-[calc(100%-64px)] overflow-y-auto">

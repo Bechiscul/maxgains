@@ -8,6 +8,7 @@
     "build": "snowpack build"
   },
   "dependencies": {
+    "firebase": "^9.6.10",
     "preact": "^10.6.4",
     "qrcode": "^1.5.0"
   },

@@ -30,4 +30,9 @@ module.exports = {
     jsxFragment: "Fragment",
     jsxInject: 'import {h, Fragment} from "preact";',
   },
+  optimize: {
+    bundle: true,
+    minify: true,
+    target: "es2018",
+  },
 };

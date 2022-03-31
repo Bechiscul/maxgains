@@ -1,4 +1,4 @@
-import { FunctionalComponent } from "preact";
+import { createContext, FunctionalComponent } from "preact";
 
 import { Link, Route, Router } from "./Router";
 
@@ -10,6 +10,19 @@ import ExercisesPage from "./pages/Exercises";
 import WorkoutPage from "./pages/Workout";
 import HistoryPage from "./pages/History";
 import TemplatePage from "./pages/Template";
+
+import { initializeApp } from "firebase/app";
+
+const firebaseOptions = {
+  apiKey: "AIzaSyCPagRhsbSY4Z6xKtVuob5t5HoOSvIwLoo",
+  authDomain: "maxgains-8ed24.firebaseapp.com",
+  projectId: "maxgains-8ed24",
+  storageBucket: "maxgains-8ed24.appspot.com",
+  messagingSenderId: "445065334201",
+  appId: "1:445065334201:web:e6ae089396e580e9867a68",
+};
+
+initializeApp(firebaseOptions);
 
 const App: FunctionalComponent = () => (
   <>
